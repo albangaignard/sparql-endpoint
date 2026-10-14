@@ -1,7 +1,8 @@
 services:
   download:
-    image: curlimages/curl:latest
-    platform: linux/arm64
+    # image: curlimages/curl:latest
+    image: secoresearch/fuseki:latest
+    platform: linux/amd64
     volumes:
       - ./data:/data
     entrypoint: ["/bin/sh", "-c"]
@@ -27,6 +28,7 @@ services:
         download "https://raw.githubusercontent.com/research-software-ecosystem/content/refs/heads/master/datasets/bioschemas-biii-dump.ttl"
         download "https://raw.githubusercontent.com/research-software-ecosystem/content/refs/heads/master/datasets/bioconda-dump.ttl"
         #download "https://raw.githubusercontent.com/research-software-ecosystem/content/refs/heads/master/datasets/bioconductor-dump.ttl"
+        download "https://raw.githubusercontent.com/research-software-ecosystem/content/refs/heads/master/datasets/bioschemas-biii-dump.ttl"
         download "https://raw.githubusercontent.com/research-software-ecosystem/content/refs/heads/master/datasets/biocontainers-dump.ttl"
         download "https://raw.githubusercontent.com/research-software-ecosystem/content/refs/heads/master/datasets/debian-dump.ttl"
         download "https://raw.githubusercontent.com/research-software-ecosystem/content/refs/heads/master/datasets/galaxy-dump.ttl"
