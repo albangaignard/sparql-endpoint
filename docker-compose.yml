@@ -1,8 +1,7 @@
 services:
   download:
-    # image: curlimages/curl:latest
-    image: secoresearch/fuseki:latest
-    platform: linux/amd64
+    image: curlimages/curl:latest
+    platform: linux/arm64
     volumes:
       - ./data:/data
     entrypoint: ["/bin/sh", "-c"]
@@ -23,26 +22,24 @@ services:
           fi
         }
 
-        download "https://raw.githubusercontent.com/research-software-ecosystem/content/refs/heads/master/datasets/bioschemas-dump.ttl"
+        BASE="https://raw.githubusercontent.com/research-software-ecosystem/content/refs/heads/master/datasets"
 
-        download "https://raw.githubusercontent.com/research-software-ecosystem/content/refs/heads/master/datasets/bioschemas-biii-dump.ttl"
-        download "https://raw.githubusercontent.com/research-software-ecosystem/content/refs/heads/master/datasets/bioconda-dump.ttl"
-        #download "https://raw.githubusercontent.com/research-software-ecosystem/content/refs/heads/master/datasets/bioconductor-dump.ttl"
-        download "https://raw.githubusercontent.com/research-software-ecosystem/content/refs/heads/master/datasets/bioschemas-biii-dump.ttl"
-        download "https://raw.githubusercontent.com/research-software-ecosystem/content/refs/heads/master/datasets/biocontainers-dump.ttl"
-        download "https://raw.githubusercontent.com/research-software-ecosystem/content/refs/heads/master/datasets/debian-dump.ttl"
-        download "https://raw.githubusercontent.com/research-software-ecosystem/content/refs/heads/master/datasets/galaxy-dump.ttl"
-
-        download "https://raw.githubusercontent.com/research-software-ecosystem/content/refs/heads/master/datasets/galaxyworkflow-dump.ttl"
-        download "https://raw.githubusercontent.com/research-software-ecosystem/content/refs/heads/master/datasets/workflowhub-dump.ttl"
-
+        download "$$BASE/bioschemas-dump.ttl"
+        download "$$BASE/bioschemas-biii-dump.ttl"
+        download "$$BASE/bioconda-dump.ttl"
+        # download "$$BASE/bioconductor-dump.ttl"
+        download "$$BASE/biocontainers-dump.ttl"
+        download "$$BASE/debian-dump.ttl"
+        download "$$BASE/galaxy-dump.ttl"
+        download "$$BASE/galaxyworkflow-dump.ttl"
+        download "$$BASE/workflowhub-dump.ttl"
         # Add more files here:
-        # download "https://example.org/another-file.ttl"
+        # download "$$BASE/another-file.ttl"
 
         echo "=== Downloads complete ==="
 
   fuseki:
-    image: stain/jena-fuseki:latest
+    image: stain/jena-fuseki:5.1.0
     platform: linux/amd64
     depends_on:
       download:
