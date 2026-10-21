@@ -14,12 +14,8 @@ services:
         download() {
           url="$$1"
           filename=$$(basename "$$url" | sed 's/?.*$$//')
-          if [ -f "$$filename" ]; then
-            echo "  Already exists, skipping: $$filename"
-          else
-            echo "  Downloading: $$filename"
-            curl -L --fail --show-error -o "$$filename" "$$url"
-          fi
+          echo "  Downloading: $$filename"
+          curl -L --fail --show-error -o "$$filename" "$$url"
         }
 
         BASE="https://raw.githubusercontent.com/research-software-ecosystem/content/refs/heads/master/datasets"
