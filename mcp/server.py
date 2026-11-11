@@ -26,7 +26,7 @@ from rdflib import Literal as RdfLiteral
 import edam
 from graph_store import GraphStore, run_query
 
-log = logging.getLogger("rsec.server2")
+log = logging.getLogger("rsec.server")
 
 
 def _setup_logging() -> None:

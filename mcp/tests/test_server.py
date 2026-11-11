@@ -1,4 +1,4 @@
-"""MCP-level tests of server2.py: one SPARQL query per tool (mini graph, no network)."""
+"""MCP-level tests of server.py: one SPARQL query per tool (mini graph, no network)."""
 
 import unittest
 from unittest import mock
@@ -6,7 +6,7 @@ from unittest import mock
 from fastmcp import Client
 from fastmcp.exceptions import ToolError
 
-import server2
+import server
 from tests.support import FIXTURES, mini_graph
 
 TOOLS = {
@@ -28,14 +28,14 @@ class _MiniStore:
         return mini_graph()
 
 
-class Server2Tests(unittest.IsolatedAsyncioTestCase):
+class ServerTests(unittest.IsolatedAsyncioTestCase):
     def setUp(self):
-        patcher = mock.patch.object(server2, "store", _MiniStore())
+        patcher = mock.patch.object(server, "store", _MiniStore())
         patcher.start()
         self.addCleanup(patcher.stop)
 
     async def call(self, name, args):
-        async with Client(server2.mcp) as c:
+        async with Client(server.mcp) as c:
             return (await c.call_tool(name, args)).data
 
     async def fails(self, name, args, message):
@@ -44,7 +44,7 @@ class Server2Tests(unittest.IsolatedAsyncioTestCase):
         self.assertIn(message, str(ctx.exception))
 
     async def test_tools_are_registered_and_read_only(self):
-        async with Client(server2.mcp) as c:
+        async with Client(server.mcp) as c:
             tools = await c.list_tools()
         self.assertEqual({t.name for t in tools}, TOOLS)
         self.assertTrue(all(t.annotations.read_only_hint for t in tools))
@@ -116,7 +116,7 @@ class Server2Tests(unittest.IsolatedAsyncioTestCase):
             ("get_software_io", "tool", "a b"),
         ]:
             with self.subTest(tool=tool, value=value):
-                with mock.patch.object(server2, "run_select") as run:
+                with mock.patch.object(server, "run_select") as run:
                     with self.assertRaises(ToolError):
                         await self.call(tool, {arg: value})
                     run.assert_not_called()
@@ -126,7 +126,7 @@ class Server2Tests(unittest.IsolatedAsyncioTestCase):
     def test_every_query_is_a_self_contained_constant_that_parses(self):
         from rdflib.plugins.sparql import prepareQuery
 
-        queries = {n: q for n, q in vars(server2).items() if n.startswith("q_")}
+        queries = {n: q for n, q in vars(server).items() if n.startswith("q_")}
         self.assertEqual(len(queries), 8)
         values = {"term": "<http://edamontology.org/topic_0080>", "tool": "<https://bio.tools/blast>",
                   "name": '"x"', "iri": '"https://bio.tools/x"', "exact": '"x"', "pattern": '"x"', "prefix": '"http://edamontology.org/"',
@@ -134,11 +134,11 @@ class Server2Tests(unittest.IsolatedAsyncioTestCase):
         for name, query in queries.items():
             with self.subTest(query=name):
                 self.assertIn("PREFIX", query)
-                prepareQuery(server2.render(query, **values))
+                prepareQuery(server.render(query, **values))
 
     def test_render_refuses_a_missing_value(self):
         with self.assertRaises(KeyError):
-            server2.render(server2.q_license)
+            server.render(server.q_license)
 
     # ---- one tool
 
@@ -215,7 +215,7 @@ class Server2Tests(unittest.IsolatedAsyncioTestCase):
             async def get(self):
                 raise OSError("no network")
 
-        with mock.patch.object(server2, "store", Broken()):
+        with mock.patch.object(server, "store", Broken()):
             await self.fails("get_license", {"tool": "blast"}, "Could not load the RSEc RDF data")
 
 
