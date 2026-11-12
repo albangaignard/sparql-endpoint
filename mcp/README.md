@@ -58,7 +58,7 @@ uv sync                   # install dependencies once
 uv run python server.py   # start the server (stdio)
 ```
 
-The server talks MCP over stdio, so started by hand it just waits silently for a client. Normally you do not run it yourself: an MCP client launches it (see [Connect an MCP client](#connect-an-mcp-client)). To try it without any client, use the next section.
+The server talks MCP over stdio, so started by hand it just waits silently for a client. Normally you do not run it yourself: an MCP client launches it from an `mcp.json` entry (see [Connect an MCP client](#connect-an-mcp-client)). To try it without any client, use the next section.
 
 On first start the server downloads the RSEc bioschemas dump (36.5 MB) and the EDAM ontology (3.4 MB, latest release from edamontology.org) into `mcp/data/`, then parses them (about 740k triples, roughly 7 s). Nothing else is precomputed: each tool call runs its SPARQL query on the loaded graph (set `RSEC_LOG_LEVEL=DEBUG` to log every query with its time). Loading starts in the background at startup and the first tool call waits for it; after that a call takes from a few milliseconds to about 2 seconds. Existing files are never re-downloaded, so to refresh the data delete `mcp/data/`.
 
@@ -106,6 +106,15 @@ The first run is slower while the data downloads and loads. The second call prin
 
 Add `offset=2` to get the next page. Add `--json` for raw JSON output.
 
+## Demo notebook
+
+[`notebooks/demo.ipynb`](notebooks/demo.ipynb) replays the session of [`docs/demo.md`](docs/demo.md) (a local LLM looking for metagenomics quality-control and abundance tools) so that it can be repeated. The questions and the shortlist of tools are fixed, and every answer comes from a real call to the MCP tools, made in-process as an MCP client would. It lists the EDAM annotations, licenses, inputs and outputs of six tools, and compares them with what the LLM said. It runs in about a minute once the data is downloaded, and the executed notebook is stored with its outputs. It is generated, so edit `notebooks/build_demo.py` rather than the `.ipynb`:
+
+```bash
+./run_tests.sh --notebook    # rebuild and execute it
+uv run --with jupyterlab --with pandas jupyter lab notebooks/demo.ipynb   # explore it
+```
+
 ## Connect an MCP client
 
 The server speaks stdio: the client launches it. Most clients (Claude Desktop, Claude Code, Cursor, VS Code, LM Studio...) read the same `mcpServers` JSON. Replace `/absolute/path/to` with the location of this repo.
@@ -151,9 +160,10 @@ Ask the agent, for example: *"Which tools do sequence alignment, and what are th
 ```bash
 ./run_tests.sh           # unit tests only (fast, no network)
 ./run_tests.sh --smoke   # + call the tools on the real data (downloads it on first run)
+./run_tests.sh --notebook   # + rebuild and execute the demo notebook on the real data
 ```
 
 or directly: `uv run python -m unittest` (add `-v` to list each test, or name a module: `python -m unittest tests.test_server`).
 The tests use only the standard library `unittest`. They use a tiny local graph and a mocked HTTP layer; they need neither network nor the real dumps.
 
-The code of the earlier design (a `KnowledgeGraph` class, composability checks, a demo notebook) is archived in [`old/`](old/); it is not run by the tests.
+The code of the earlier design (a `KnowledgeGraph` class, composability checks, its own demo notebook) is archived in [`old/`](old/); it is not run by the tests.
